@@ -1,6 +1,6 @@
 # Scheduler
 
-> A execution queue that stores and runs lambda functions, with cancellation and scheduling.
+> Header-only C++20 task scheduler that stores and runs delayed lambda functions with cancellation tokens.
 
 - A `Scheduler` class that accepts `std::function<void()>` tasks and inserts them in a priority_queue.
 - Tasks are added with a delay using `std::chrono`
@@ -43,10 +43,10 @@ bool operator>(const Task& other) const {
         return scheduled_time > other.scheduled_time;
     }
 ```
-- Instead of polling every ms for new task, the thread is blocked until the schedule time of next task in the queue
+- Instead of polling for new expired tasks, the thread blocks until the scheduled time of the next task in the queue
 ```std::this_thread::sleep_until(queue.top().getScheduledTime());```
 - **Exception safety**: each task's execution is wrapped in `try/catch` so one throwing lambda cannot crash the entire program. 
-- **`std::shared_ptr<std::atomic<bool>>`** keeps track of a shared cancellation flag so both the `CancellationToken` (held by the caller) and the `Task` (inside the queue) share ownership of the same flag. Calling `cancel()` on the caller held `CancellationToken` updated the `canceled_flag` of the original `Task` object stored in the priority_queue
+- **`std::shared_ptr<std::atomic<bool>>`** keeps a shared cancellation flag so both the `CancellationToken` (held by the caller) and the queued `Task` share the same flag. Calling `cancel()` sets the flag; the scheduler checks it before executing the task.
 ---
 
 ## Public API
@@ -55,7 +55,7 @@ bool operator>(const Task& other) const {
 
 | Method | Description |
 |---|---|
-| `add(job, delay)` | Schedule a `std::function<void()>` to run after `delay` ms. Returns a `CancellationToken`. |
+| `add(job, delay)` | Schedule a `std::function<void()>` to run after `delay` (a `std::chrono::milliseconds`). Returns a `CancellationToken`. |
 | `run()` | Block and execute all tasks in scheduled order. |
 
 **`scheduler::CancellationToken`**
@@ -73,7 +73,7 @@ bool operator>(const Task& other) const {
 \`\`\`bash
 cmake -S . -B build
 cmake --build build --parallel
-./build/demo
+./build/scheduler
 \`\`\`
 
 Requires: CMake 3.20+, a C++20 compiler 
