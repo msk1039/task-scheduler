@@ -70,11 +70,11 @@ bool operator>(const Task& other) const {
 
 ## Build & Run
 
-\`\`\`bash
+```bash
 cmake -S . -B build
 cmake --build build --parallel
 ./build/scheduler
-\`\`\`
+```
 
 Requires: CMake 3.20+, a C++20 compiler 
 
