@@ -1,0 +1,25 @@
+# Build directories
+build*/
+
+# CMake generated
+CMakeCache.txt
+CMakeFiles/
+
+_deps/
+
+# Compiled output
+*.o
+*.a
+*.so
+*.dylib
+
+
+# Local docs
+cmake-guide.md
+
+# IDE / editor
+.cache/
+.clangd
+.vscode/
+*.swp
+.DS_Store
